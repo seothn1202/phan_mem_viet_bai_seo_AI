@@ -1,0 +1,6 @@
+{
+  "name": "WP AI SEO Studio",
+  "description": "WordPress AI SEO automation studio for managing 10+ sites, keyword research, AI writing, quality gating, and scheduled publishing.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
