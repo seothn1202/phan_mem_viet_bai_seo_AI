@@ -46,5 +46,16 @@ class ExampleRobolectricTest {
     repo.addWebsite(newSite)
     assertEquals(initialSites.size + 1, repo.sites.value.size)
     assertNotNull(repo.sites.value.find { it.id == "site_test_99" })
+
+    // Test Analyze & Cluster Topic
+    val newKeywords = repo.analyzeAndClusterTopic("du lịch đà nẵng", "VN")
+    assertTrue(newKeywords.isNotEmpty())
+    assertTrue(repo.keywords.value.any { it.keyword.contains("du lịch đà nẵng") })
+
+    // Test Budget update
+    repo.updateBudgetSettings(100.0, 5.0, 90, true, "Gemini 1.5 Flash")
+    assertEquals(100.0, repo.costSummary.value.budgetCapUsd, 0.01)
+    assertEquals("Gemini 1.5 Flash", repo.costSummary.value.topModel)
+    assertEquals(100.0, repo.automationConfig.value.monthlyBudgetCapUsd, 0.01)
   }
 }

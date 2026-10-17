@@ -286,6 +286,9 @@ class MainActivity : ComponentActivity() {
                 language = currentLanguage,
                 keywords = keywords,
                 onAddKeyword = { kw -> repository.addKeyword(kw) },
+                onAnalyzeTopic = { topic, market ->
+                  repository.analyzeAndClusterTopic(topic, market)
+                },
                 onDraftWithAi = { kw ->
                   repository.setDraftFromKeyword(kw)
                   currentScreen = Screen.AI_WRITER
@@ -335,7 +338,10 @@ class MainActivity : ComponentActivity() {
               )
               Screen.COST -> CostControlScreen(
                 language = currentLanguage,
-                summary = costSummary
+                summary = costSummary,
+                onUpdateBudget = { monthly, daily, alertThreshold, autoHalt, model ->
+                  repository.updateBudgetSettings(monthly, daily, alertThreshold, autoHalt, model)
+                }
               )
               Screen.BACKUP -> VersionBackupScreen(
                 language = currentLanguage,

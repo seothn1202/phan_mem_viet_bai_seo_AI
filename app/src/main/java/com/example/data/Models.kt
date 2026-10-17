@@ -142,11 +142,33 @@ data class AutomationConfig(
 data class CostSummary(
   val currentSpendUsd: Double = 14.85,
   val budgetCapUsd: Double = 50.0,
+  val dailyBudgetCapUsd: Double = 3.5,
+  val alertThresholdPercent: Int = 85,
+  val autoHaltOnLimit: Boolean = true,
+  val isFreeTierMode: Boolean = false,
+  val freeTierQuotaLeft: String = "15 RPM / 1,500 requests/ngày",
   val promptTokens: Long = 1_420_000,
   val completionTokens: Long = 890_000,
   val totalArticlesGenerated: Int = 342,
   val avgCostPerArticle: Double = 0.043,
   val topModel: String = "Gemini 1.5 Pro"
+)
+
+enum class BacklogStatus {
+  PENDING, DRAFTING, COMPLETED
+}
+
+data class WritingBacklogItem(
+  val id: String,
+  val keyword: String,
+  val intent: SearchIntent = SearchIntent.INFORMATIONAL,
+  val cluster: String = "Tổng Hợp",
+  val targetSiteId: String = "site_1",
+  val targetSiteName: String = "TechTrend Vietnam",
+  val priority: KeywordPriority = KeywordPriority.HIGH,
+  val status: BacklogStatus = BacklogStatus.PENDING,
+  val addedDate: String = "Hôm nay",
+  val source: String = "Trang tính Google Sheets"
 )
 
 enum class ActivityType {

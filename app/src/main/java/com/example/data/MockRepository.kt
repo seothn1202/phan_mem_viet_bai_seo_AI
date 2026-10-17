@@ -587,6 +587,39 @@ Hệ thống sử dụng cơ chế hash nội dung và so sánh semantic vector 
     }
   }
 
+  fun updateBudgetSettings(
+    monthlyBudget: Double,
+    dailyBudget: Double,
+    alertThreshold: Int,
+    autoHalt: Boolean,
+    preferredModel: String
+  ) {
+    _costSummary.update {
+      it.copy(
+        budgetCapUsd = monthlyBudget,
+        dailyBudgetCapUsd = dailyBudget,
+        alertThresholdPercent = alertThreshold,
+        autoHaltOnLimit = autoHalt,
+        topModel = preferredModel
+      )
+    }
+    _automationConfig.update {
+      it.copy(monthlyBudgetCapUsd = monthlyBudget)
+    }
+    _activities.update {
+      listOf(
+        ActivityLog(
+          id = "act_${System.currentTimeMillis()}",
+          timestamp = "Vừa xong",
+          titleVi = "Đã cập nhật hạn mức ngân sách AI: $$monthlyBudget/tháng",
+          titleEn = "Updated AI monthly budget cap: $$monthlyBudget",
+          siteName = "Cost Control",
+          type = ActivityType.SYSTEM
+        )
+      ) + it
+    }
+  }
+
   fun addWebsite(newSite: WordPressSite) {
     _sites.update { listOf(newSite) + it }
   }
@@ -615,6 +648,121 @@ Hệ thống sử dụng cơ chế hash nội dung và so sánh semantic vector 
 
   fun addKeyword(kw: KeywordItem) {
     _keywords.update { listOf(kw) + it }
+  }
+
+  fun analyzeAndClusterTopic(seedTopic: String, market: String = "VN"): List<KeywordItem> {
+    val cleanTopic = seedTopic.trim()
+    if (cleanTopic.isBlank()) return emptyList()
+
+    val clusterName = cleanTopic.split(" ")
+      .take(3)
+      .joinToString(" ") { word -> word.replaceFirstChar { char -> char.uppercase() } }
+
+    val generated = listOf(
+      KeywordItem(
+        id = "kw_${System.currentTimeMillis()}_1",
+        keyword = cleanTopic.lowercase(),
+        seedTopic = clusterName,
+        market = "$market (Google Search)",
+        intent = SearchIntent.INFORMATIONAL,
+        estimatedVolume = (3000..12000).random(),
+        kdPercent = (20..55).random(),
+        cluster = clusterName,
+        priority = KeywordPriority.HIGH,
+        source = "Live SERP API"
+      ),
+      KeywordItem(
+        id = "kw_${System.currentTimeMillis()}_2",
+        keyword = "hướng dẫn ${cleanTopic.lowercase()} chi tiết từ a đến z",
+        seedTopic = clusterName,
+        market = "$market (Google Search)",
+        intent = SearchIntent.INFORMATIONAL,
+        estimatedVolume = (1800..6500).random(),
+        kdPercent = (15..35).random(),
+        cluster = clusterName,
+        priority = KeywordPriority.HIGH,
+        source = "Google Search Console"
+      ),
+      KeywordItem(
+        id = "kw_${System.currentTimeMillis()}_3",
+        keyword = "top công cụ ${cleanTopic.lowercase()} tốt nhất 2026",
+        seedTopic = clusterName,
+        market = "$market (Google Search)",
+        intent = SearchIntent.COMMERCIAL,
+        estimatedVolume = (4500..15000).random(),
+        kdPercent = (35..65).random(),
+        cluster = clusterName,
+        priority = KeywordPriority.HIGH,
+        source = "Live SERP API"
+      ),
+      KeywordItem(
+        id = "kw_${System.currentTimeMillis()}_4",
+        keyword = "bảng giá ${cleanTopic.lowercase()} ưu đãi mới nhất",
+        seedTopic = clusterName,
+        market = "$market (Google Search)",
+        intent = SearchIntent.TRANSACTIONAL,
+        estimatedVolume = (1200..4800).random(),
+        kdPercent = (40..70).random(),
+        cluster = clusterName,
+        priority = KeywordPriority.MEDIUM,
+        source = "Competitor Gap"
+      ),
+      KeywordItem(
+        id = "kw_${System.currentTimeMillis()}_5",
+        keyword = "kinh nghiệm tối ưu ${cleanTopic.lowercase()} chuẩn seo hiệu quả",
+        seedTopic = clusterName,
+        market = "$market (Google Search)",
+        intent = SearchIntent.INFORMATIONAL,
+        estimatedVolume = (2200..5900).random(),
+        kdPercent = (22..42).random(),
+        cluster = clusterName,
+        priority = KeywordPriority.HIGH,
+        source = "Google Search Console"
+      ),
+      KeywordItem(
+        id = "kw_${System.currentTimeMillis()}_6",
+        keyword = "so sánh và đánh giá ${cleanTopic.lowercase()} thực tế",
+        seedTopic = clusterName,
+        market = "$market (Google Search)",
+        intent = SearchIntent.COMMERCIAL,
+        estimatedVolume = (1500..4200).random(),
+        kdPercent = (28..48).random(),
+        cluster = clusterName,
+        priority = KeywordPriority.MEDIUM,
+        source = "Live SERP API"
+      ),
+      KeywordItem(
+        id = "kw_${System.currentTimeMillis()}_7",
+        keyword = "đăng ký mua ${cleanTopic.lowercase()} ở đâu uy tín",
+        seedTopic = clusterName,
+        market = "$market (Google Search)",
+        intent = SearchIntent.TRANSACTIONAL,
+        estimatedVolume = (900..3100).random(),
+        kdPercent = (45..75).random(),
+        cluster = clusterName,
+        priority = KeywordPriority.MEDIUM,
+        source = "Competitor Gap"
+      )
+    )
+
+    _keywords.update { current ->
+      generated + current.filter { it.keyword != cleanTopic.lowercase() }
+    }
+
+    _activities.update { current ->
+      listOf(
+        ActivityLog(
+          id = "act_${System.currentTimeMillis()}",
+          timestamp = "Vừa xong",
+          titleVi = "Đã phân tích và phát hiện 7 từ khóa mới cho: $cleanTopic",
+          titleEn = "Discovered 7 new clustered keywords for: $cleanTopic",
+          siteName = "SERP & GSC Feed",
+          type = ActivityType.SYSTEM
+        )
+      ) + current
+    }
+
+    return generated
   }
 
   fun setDraftFromKeyword(keyword: KeywordItem) {
@@ -713,6 +861,180 @@ Hệ thống sử dụng cơ chế hash nội dung và so sánh semantic vector 
           )
         } else item
       }
+    }
+  }
+
+  // 10. Article Writing Backlog
+  private val _writingBacklog = MutableStateFlow(
+    listOf(
+      WritingBacklogItem(
+        id = "bl_1",
+        keyword = "top plugin seo wordpress tốt nhất 2026",
+        intent = SearchIntent.COMMERCIAL,
+        cluster = "SEO Plugins",
+        targetSiteId = "site_1",
+        targetSiteName = "TechTrend Vietnam",
+        priority = KeywordPriority.HIGH,
+        status = BacklogStatus.PENDING,
+        addedDate = "Hôm nay 08:30",
+        source = "Nghiên cứu SERP"
+      ),
+      WritingBacklogItem(
+        id = "bl_2",
+        keyword = "cách cài wordpress bằng docker chi tiết",
+        intent = SearchIntent.INFORMATIONAL,
+        cluster = "WordPress Dev",
+        targetSiteId = "site_1",
+        targetSiteName = "TechTrend Vietnam",
+        priority = KeywordPriority.HIGH,
+        status = BacklogStatus.DRAFTING,
+        addedDate = "Hôm nay 09:10",
+        source = "Google Search Console"
+      ),
+      WritingBacklogItem(
+        id = "bl_3",
+        keyword = "mã giảm giá hosting namecheap black friday",
+        intent = SearchIntent.TRANSACTIONAL,
+        cluster = "Hosting Deals",
+        targetSiteId = "site_2",
+        targetSiteName = "DealHunter Global",
+        priority = KeywordPriority.HIGH,
+        status = BacklogStatus.PENDING,
+        addedDate = "Hôm qua",
+        source = "Trang tính Google Sheets"
+      ),
+      WritingBacklogItem(
+        id = "bl_4",
+        keyword = "thực đơn eat clean 7 ngày giảm mỡ bụng",
+        intent = SearchIntent.INFORMATIONAL,
+        cluster = "Dinh Dưỡng",
+        targetSiteId = "site_3",
+        targetSiteName = "HealthGuide 365",
+        priority = KeywordPriority.MEDIUM,
+        status = BacklogStatus.COMPLETED,
+        addedDate = "Hôm qua",
+        source = "Trang tính Google Sheets"
+      )
+    )
+  )
+  val writingBacklog: StateFlow<List<WritingBacklogItem>> = _writingBacklog.asStateFlow()
+
+  fun addToWritingBacklog(item: WritingBacklogItem) {
+    _writingBacklog.update { listOf(item) + it }
+  }
+
+  fun addKeywordToBacklog(keyword: KeywordItem, targetSiteId: String, targetSiteName: String) {
+    val newItem = WritingBacklogItem(
+      id = "bl_${System.currentTimeMillis()}",
+      keyword = keyword.keyword,
+      intent = keyword.intent,
+      cluster = keyword.cluster,
+      targetSiteId = targetSiteId,
+      targetSiteName = targetSiteName,
+      priority = keyword.priority,
+      status = BacklogStatus.PENDING,
+      addedDate = "Hôm nay",
+      source = keyword.source
+    )
+    _writingBacklog.update { listOf(newItem) + it }
+  }
+
+  fun removeBacklogItem(id: String) {
+    _writingBacklog.update { list -> list.filter { it.id != id } }
+  }
+
+  fun updateBacklogItemStatus(id: String, newStatus: BacklogStatus) {
+    _writingBacklog.update { list ->
+      list.map { if (it.id == id) it.copy(status = newStatus) else it }
+    }
+  }
+
+  fun importKeywordsFromSpreadsheet(
+    rawText: String,
+    targetSiteId: String,
+    targetSiteName: String
+  ): Int {
+    if (rawText.isBlank()) return 0
+    val lines = rawText.split("\n", "\r\n")
+    val newItems = mutableListOf<WritingBacklogItem>()
+
+    lines.forEach { line ->
+      val trimmed = line.trim()
+      if (trimmed.isNotBlank() && !trimmed.startsWith("Từ khóa", ignoreCase = true) && !trimmed.startsWith("Keyword", ignoreCase = true)) {
+        val delimiter = when {
+          trimmed.contains("\t") -> "\t"
+          trimmed.contains(",") -> ","
+          trimmed.contains(";") -> ";"
+          else -> null
+        }
+
+        val parts = if (delimiter != null) trimmed.split(delimiter).map { it.trim().trim('"', '\'') } else listOf(trimmed)
+        val keyword = parts.getOrNull(0) ?: ""
+        if (keyword.isNotBlank()) {
+          val intentStr = parts.getOrNull(1)?.uppercase() ?: ""
+          val intent = when {
+            intentStr.contains("COMMERCIAL") -> SearchIntent.COMMERCIAL
+            intentStr.contains("TRANSACTIONAL") -> SearchIntent.TRANSACTIONAL
+            intentStr.contains("NAVIGATIONAL") -> SearchIntent.NAVIGATIONAL
+            else -> SearchIntent.INFORMATIONAL
+          }
+          val cluster = parts.getOrNull(2)?.ifBlank { null } ?: keyword.split(" ").take(2).joinToString(" ").replaceFirstChar { it.uppercase() }
+          val priorityStr = parts.getOrNull(3)?.uppercase() ?: ""
+          val priority = when {
+            priorityStr.contains("LOW") -> KeywordPriority.LOW
+            priorityStr.contains("MED") -> KeywordPriority.MEDIUM
+            else -> KeywordPriority.HIGH
+          }
+
+          newItems.add(
+            WritingBacklogItem(
+              id = "bl_sheet_${System.currentTimeMillis()}_${newItems.size}",
+              keyword = keyword,
+              intent = intent,
+              cluster = cluster,
+              targetSiteId = targetSiteId,
+              targetSiteName = targetSiteName,
+              priority = priority,
+              status = BacklogStatus.PENDING,
+              addedDate = "Vừa nhập",
+              source = "Trang tính Google Sheets"
+            )
+          )
+        }
+      }
+    }
+
+    if (newItems.isNotEmpty()) {
+      _writingBacklog.update { newItems + it }
+      _activities.update {
+        listOf(
+          ActivityLog(
+            id = "act_${System.currentTimeMillis()}",
+            timestamp = "Vừa xong",
+            titleVi = "Đã nhập ${newItems.size} từ khóa từ Trang tính vào Danh sách viết bài",
+            titleEn = "Imported ${newItems.size} keywords from Spreadsheet to Writing Backlog",
+            siteName = targetSiteName,
+            type = ActivityType.SYSTEM
+          )
+        ) + it
+      }
+    }
+
+    return newItems.size
+  }
+
+  fun setFreeTierMode(enabled: Boolean) {
+    _costSummary.update {
+      it.copy(
+        isFreeTierMode = enabled,
+        topModel = if (enabled) "Gemini 1.5 Flash (100% Free Quota)" else "Gemini 1.5 Pro",
+        budgetCapUsd = if (enabled) 0.0 else 50.0,
+        currentSpendUsd = if (enabled) 0.0 else it.currentSpendUsd,
+        avgCostPerArticle = if (enabled) 0.0 else 0.043
+      )
+    }
+    _automationConfig.update {
+      it.copy(monthlyBudgetCapUsd = if (enabled) 0.0 else 50.0)
     }
   }
 }

@@ -13,12 +13,25 @@ object I18n {
     "nav_keywords" to "Từ khóa",
     "nav_competitors" to "Đối thủ",
     "nav_ai_writer" to "AI Writer",
+    "nav_backlog" to "DS Viết bài",
     "nav_quality_gate" to "Quality Gate",
     "nav_publishing" to "Xuất bản",
     "nav_automation" to "Tự động hóa",
     "nav_cost" to "Chi phí AI",
     "nav_backup" to "Sao lưu & Lịch sử",
     "nav_settings" to "Cài đặt",
+
+    // Backlog & Spreadsheet Import
+    "backlog_title" to "Danh sách Từ khóa cần viết bài",
+    "backlog_subtitle" to "Kế hoạch nội dung & nhập hàng loạt từ Google Sheets / Excel",
+    "backlog_import_sheet" to "Nhập từ Trang Tính (Sheets / CSV)",
+    "backlog_add_manual" to "Thêm từ khóa",
+    "backlog_tab_all" to "Tất cả",
+    "backlog_tab_pending" to "Chờ viết",
+    "backlog_tab_drafting" to "Đang viết",
+    "backlog_tab_completed" to "Đã xong",
+    "cost_free_mode" to "Chế độ Miễn Phí (100% Free Tier - $0.00)",
+    "cost_free_sub" to "Sử dụng hạn mức miễn phí Google Gemini Free Tier (15 RPM / $0.00)",
 
     // Dashboard
     "dash_overview_title" to "Bảng điều khiển SEO & Tự động hóa",
@@ -168,12 +181,25 @@ object I18n {
     "nav_keywords" to "Keywords",
     "nav_competitors" to "Competitors",
     "nav_ai_writer" to "AI Writer",
+    "nav_backlog" to "Backlog",
     "nav_quality_gate" to "Quality Gate",
     "nav_publishing" to "Publishing",
     "nav_automation" to "Automation",
     "nav_cost" to "AI Cost",
     "nav_backup" to "Backup & History",
     "nav_settings" to "Settings",
+
+    // Backlog & Spreadsheet Import
+    "backlog_title" to "Article Writing Backlog",
+    "backlog_subtitle" to "Content plan & bulk import from Google Sheets / Excel",
+    "backlog_import_sheet" to "Import from Spreadsheet (Sheets / CSV)",
+    "backlog_add_manual" to "Add Keyword",
+    "backlog_tab_all" to "All",
+    "backlog_tab_pending" to "Pending",
+    "backlog_tab_drafting" to "Drafting",
+    "backlog_tab_completed" to "Completed",
+    "cost_free_mode" to "100% Free Tier Mode ($0.00)",
+    "cost_free_sub" to "Use Google Gemini Free Quota (15 RPM / 0.00 USD billing)",
 
     // Dashboard
     "dash_overview_title" to "SEO & Automation Dashboard",
